@@ -13,7 +13,7 @@
     <!-- Пустая иконка (чтобы не было 404) -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
-        /* Все ваши стили без изменений */
+        /* Все ваши стили без изменений (оставлены как в предыдущей версии) */
         * {
             margin: 0;
             padding: 0;
@@ -682,7 +682,7 @@
                 </div>
                 <!-- Слайд 3 -->
                 <div class="slide">
-                    <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" alt="Тренажёрный зал">
+                    <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" alt="Силовые тренажёры">
                     <div class="slide-content">
                         <h3>Силовые тренажёры</h3>
                         <p>Более 40 единиц изолирующих и многофункциональных тренажёров</p>
@@ -807,7 +807,7 @@
             });
         });
 
-        // ========== БЕСКОНЕЧНЫЙ СЛАЙДЕР (без изменений) ==========
+        // ========== БЕСКОНЕЧНЫЙ СЛАЙДЕР ==========
         const track = document.getElementById('sliderTrack');
         const originalSlides = Array.from(document.querySelectorAll('.slide'));
         const prevBtn = document.getElementById('prevBtn');
@@ -899,7 +899,7 @@
 
         updateDots();
 
-        // ========== МАСКА ДЛЯ ТЕЛЕФОНА (без изменений) ==========
+        // ========== МАСКА ДЛЯ ТЕЛЕФОНА ==========
         const phoneInput = document.getElementById('phone');
 
         function phoneMask(e) {
@@ -937,18 +937,19 @@
             }
         });
 
-        // ========== НОВАЯ ОТПРАВКА ФОРМЫ В TELEGRAM ЧЕРЕЗ CORS-ПРОКСИ ==========
+        // ========== ОТПРАВКА ФОРМЫ В TELEGRAM ЧЕРЕЗ РАБОЧИЙ CORS-ПРОКСИ ==========
         const contactForm = document.getElementById('contactForm');
         const TELEGRAM_TOKEN = '8150921908:AAE2y9IBWX2o1LmI4M0tvUv9PHKqfctOixY';
         const TELEGRAM_CHAT_ID = '1082877344';
 
-        // Публичный CORS-прокси (если перестанет работать, можно заменить на другой)
-        const PROXY_URL = 'https://corsproxy.io/?';
+        // Используем прокси, который корректно обрабатывает CORS (поддерживает preflight)
+        const PROXY_URL = 'https://thingproxy.freeboard.io/fetch/';
+        // Запасной вариант (если thingproxy не работает, можно раскомментировать):
+        // const PROXY_URL = 'https://corsproxy.io/?';
 
         contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // отменяем стандартную отправку
+            e.preventDefault();
 
-            // Собираем данные формы
             const formData = new FormData(contactForm);
             const name = formData.get('name') || 'не указано';
             const email = formData.get('email') || 'не указано';
@@ -956,7 +957,6 @@
             const telegram = formData.get('telegram') || 'не указано';
             const message = formData.get('message') || 'не указано';
 
-            // Формируем текст для Telegram
             const text = `📩 Новая заявка с сайта GAEV FITNESS HUB:\n\n` +
                          `👤 Имя: ${name}\n` +
                          `📧 Email: ${email}\n` +
@@ -964,11 +964,9 @@
                          `✈️ Telegram: ${telegram}\n` +
                          `💬 Сообщение: ${message}`;
 
-            // URL для отправки в Telegram (прямой)
             const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-
-            // Оборачиваем в прокси, чтобы избежать CORS
-            const proxyUrl = PROXY_URL + encodeURIComponent(telegramUrl);
+            // Для thingproxy просто добавляем URL после слеша, без encodeURIComponent
+            const proxyUrl = PROXY_URL + telegramUrl;
 
             try {
                 const response = await fetch(proxyUrl, {
@@ -983,13 +981,12 @@
                     })
                 });
 
-                // Прокси может вернуть ответ с дополнительными заголовками, но тело должно быть от Telegram
                 const result = await response.json();
 
                 if (result.ok) {
                     alert('✅ Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
-                    contactForm.reset(); // очищаем форму
-                    phoneInput.value = ''; // сброс поля телефона
+                    contactForm.reset();
+                    phoneInput.value = '';
                 } else {
                     alert('❌ Ошибка при отправке. Попробуйте позже или свяжитесь с нами по телефону.');
                 }
