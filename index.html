@@ -185,6 +185,13 @@
             box-shadow: 0 12px 22px rgba(153, 76, 161, 0.28);
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         section {
             padding: 80px 0;
             border-bottom: 1px solid var(--border-light);
@@ -629,6 +636,20 @@
             margin-top: 12px;
             text-align: center;
         }
+        .availability-warning {
+            color: #d32f2f;
+            font-size: 0.8rem;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .availability-warning.show {
+            display: block;
+        }
+        option.disabled-option {
+            color: #999;
+            background: #f5f5f5;
+        }
 
         @media (max-width: 880px) {
             .contact-wrapper { grid-template-columns: 1fr; }
@@ -738,12 +759,12 @@
         <form id="bookingForm">
             <div class="form-group">
                 <i class="fas fa-calendar-alt"></i>
-                <input type="date" id="bookingDate" name="date" required min="">
+                <input type="date" id="bookingDate" name="date" required>
             </div>
             <div class="form-group">
                 <i class="fas fa-clock"></i>
                 <select id="startHour" name="startHour" required>
-                    <!-- заполним JS -->
+                    <!-- заполняется динамически -->
                 </select>
             </div>
             <div class="form-group">
@@ -755,6 +776,7 @@
                     <option value="4">4 часа</option>
                 </select>
             </div>
+            <div class="availability-warning" id="availabilityWarning"></div>
             <div class="price-info">
                 <span>Стоимость (290₽/час):</span>
                 <span class="total-price" id="totalPrice">290 ₽</span>
@@ -767,15 +789,28 @@
                 <i class="fas fa-phone-alt"></i>
                 <input type="tel" id="customerPhone" name="customerPhone" placeholder="+7 (___) ___-__-__" required>
             </div>
-            <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Забронировать</button>
-            <p class="small-note">После отправки мы свяжемся для подтверждения</p>
+            <div class="form-group">
+                <i class="fab fa-telegram-plane"></i>
+                <input type="text" id="customerTelegram" name="customerTelegram" placeholder="Telegram username (например, @user)">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="customerEmail" name="customerEmail" placeholder="Email (для подтверждения)">
+            </div>
+            <button type="submit" class="btn" id="submitBookingBtn"><i class="fas fa-paper-plane"></i> Забронировать</button>
+            <p class="small-note">После отправки вы получите подтверждение на Telegram или email</p>
         </form>
     </div>
 </div>
 
 <script>
     (function() {
-        // fade-in animation
+        // ---------- КОНФИГУРАЦИЯ ----------
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzIL3TuL4c5l8K0WGa6EGS2rrPhOW3hf8-IOUys7-gzzn0Kpu9PKfFs-C9u-GJ66Ojv/exec';
+        const MAX_PERSONS = 10;
+        const PRICE_PER_HOUR = 290;
+        
+        // ---------- FADE-IN ANIMATION ----------
         const fadeElements = document.querySelectorAll('.fade-in');
         function checkVisibility() {
             const winH = window.innerHeight;
@@ -789,7 +824,7 @@
         window.addEventListener('load', checkVisibility);
         window.addEventListener('scroll', checkVisibility);
         
-        // smooth anchor
+        // ---------- SMOOTH SCROLL ----------
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -802,7 +837,7 @@
             });
         });
         
-        // ========= INFINITE SLIDER =========
+        // ---------- SLIDER (оставляем как было) ----------
         const track = document.getElementById('sliderTrack');
         const slides = Array.from(document.querySelectorAll('.slide'));
         const prevBtn = document.getElementById('prevBtn');
@@ -877,7 +912,7 @@
         });
         updateDots();
         
-        // ========= PHONE MASK (общая функция) =========
+        // ---------- PHONE MASK (универсальная) ----------
         function applyPhoneMask(inputElement) {
             function phoneMaskHandler(e) {
                 let value = e.target.value.replace(/\D/g, '');
@@ -898,12 +933,8 @@
         const phoneInput = document.getElementById('phone');
         applyPhoneMask(phoneInput);
         
-        // ========= TELEGRAM (контактная форма) =========
+        // ---------- КОНТАКТНАЯ ФОРМА (TELEGRAM) ----------
         const contactForm = document.getElementById('contactForm');
-        const TELEGRAM_TOKEN = '8150921908:AAE2y9IBWX2o1LmI4M0tvUv9PHKqfctOixY';
-        const TELEGRAM_CHAT_ID = '1082877344';
-        const PROXY_URL = 'https://thingproxy.freeboard.io/fetch/';
-        
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(contactForm);
@@ -913,6 +944,10 @@
             const telegram = formData.get('telegram') || 'не указано';
             const message = formData.get('message') || 'не указано';
             const text = `📩 Новая заявка:\n👤 Имя: ${name}\n📧 Email: ${email}\n📞 Телефон: ${phone}\n✈️ Telegram: ${telegram}\n💬 Сообщение: ${message}`;
+            // Для контактной формы используем прямую отправку в Telegram (как было раньше)
+            const TELEGRAM_TOKEN = '8150921908:AAE2y9IBWX2o1LmI4M0tvUv9PHKqfctOixY';
+            const TELEGRAM_CHAT_ID = '1082877344';
+            const PROXY_URL = 'https://thingproxy.freeboard.io/fetch/';
             const apiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
             try {
                 const response = await fetch(PROXY_URL + apiUrl, {
@@ -944,41 +979,147 @@
         const totalPriceSpan = document.getElementById('totalPrice');
         const bookingDateInput = document.getElementById('bookingDate');
         const customerPhoneInput = document.getElementById('customerPhone');
+        const customerNameInput = document.getElementById('customerName');
+        const customerTelegramInput = document.getElementById('customerTelegram');
+        const customerEmailInput = document.getElementById('customerEmail');
+        const availabilityWarning = document.getElementById('availabilityWarning');
+        const submitBtn = document.getElementById('submitBookingBtn');
         
         // Установка минимальной даты (сегодня)
         const today = new Date().toISOString().split('T')[0];
         bookingDateInput.setAttribute('min', today);
         bookingDateInput.value = today;
         
-        // Заполняем часы (например с 9:00 до 22:00)
-        function populateHours() {
+        // Загружаем сохранённые данные пользователя
+        function loadUserData() {
+            const saved = localStorage.getItem('userBookingInfo');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    customerNameInput.value = data.name || '';
+                    customerPhoneInput.value = data.phone || '';
+                    customerTelegramInput.value = data.telegram || '';
+                    customerEmailInput.value = data.email || '';
+                } catch(e) {}
+            }
+        }
+        loadUserData();
+        
+        // Маска для телефона в модалке
+        applyPhoneMask(customerPhoneInput);
+        
+        // Заполнение часов (9:00–22:00)
+        function populateHours(hourlyCount = null) {
+            const currentVal = startHourSelect.value;
             startHourSelect.innerHTML = '';
             for (let h = 9; h <= 22; h++) {
                 const hourStr = h.toString().padStart(2, '0') + ':00';
                 const option = document.createElement('option');
                 option.value = h;
                 option.textContent = hourStr;
+                
+                if (hourlyCount) {
+                    const count = hourlyCount[h] || 0;
+                    if (count >= MAX_PERSONS) {
+                        option.disabled = true;
+                        option.classList.add('disabled-option');
+                        option.textContent = hourStr + ` (занято)`;
+                    }
+                }
                 startHourSelect.appendChild(option);
             }
+            if (currentVal) {
+                const exists = Array.from(startHourSelect.options).some(opt => opt.value === currentVal && !opt.disabled);
+                if (exists) startHourSelect.value = currentVal;
+            }
+            validateSelection();
         }
         populateHours();
         
-        // Маска телефона для модалки
-        applyPhoneMask(customerPhoneInput);
+        // Проверка доступности выбранного диапазона
+        async function checkAvailabilityAndUpdate() {
+            const date = bookingDateInput.value;
+            if (!date) return;
+            
+            try {
+                const url = `${SCRIPT_URL}?action=checkAvailability&date=${encodeURIComponent(date)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.success) {
+                    populateHours(data.hourlyCount);
+                }
+            } catch (e) {
+                console.error('Ошибка проверки занятости:', e);
+            }
+        }
+        
+        // Валидация выбора (не превышен ли лимит на выбранных часах)
+        async function validateSelection() {
+            const date = bookingDateInput.value;
+            const start = parseInt(startHourSelect.value);
+            const duration = parseInt(durationSelect.value);
+            
+            if (!date || isNaN(start) || isNaN(duration)) {
+                submitBtn.disabled = false;
+                availabilityWarning.classList.remove('show');
+                return;
+            }
+            
+            try {
+                const url = `${SCRIPT_URL}?action=checkAvailability&date=${encodeURIComponent(date)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.success) {
+                    const counts = data.hourlyCount;
+                    let conflict = false;
+                    let conflictHour = null;
+                    for (let h = start; h < start + duration; h++) {
+                        if (counts[h] >= MAX_PERSONS) {
+                            conflict = true;
+                            conflictHour = h;
+                            break;
+                        }
+                    }
+                    if (conflict) {
+                        submitBtn.disabled = true;
+                        availabilityWarning.textContent = `⚠️ На ${conflictHour}:00 уже достигнут лимит (${MAX_PERSONS} чел.). Выберите другое время.`;
+                        availabilityWarning.classList.add('show');
+                    } else {
+                        submitBtn.disabled = false;
+                        availabilityWarning.classList.remove('show');
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
         
         // Обновление цены
         function updateTotalPrice() {
             const hours = parseInt(durationSelect.value) || 1;
-            const total = hours * 290;
+            const total = hours * PRICE_PER_HOUR;
             totalPriceSpan.textContent = total + ' ₽';
         }
-        durationSelect.addEventListener('change', updateTotalPrice);
+        
+        // События
+        bookingDateInput.addEventListener('change', async () => {
+            await checkAvailabilityAndUpdate();
+            validateSelection();
+        });
+        startHourSelect.addEventListener('change', validateSelection);
+        durationSelect.addEventListener('change', () => {
+            updateTotalPrice();
+            validateSelection();
+        });
         updateTotalPrice();
         
         // Открытие/закрытие модалки
-        buyBtn.addEventListener('click', () => {
+        buyBtn.addEventListener('click', async () => {
             modalOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
+            loadUserData(); // подгружаем сохранённые данные
+            await checkAvailabilityAndUpdate();
+            validateSelection();
         });
         
         function closeModal() {
@@ -990,54 +1131,77 @@
             if (e.target === modalOverlay) closeModal();
         });
         
-        // Отправка брони в Telegram
+        // Сохранение данных пользователя
+        function saveUserData() {
+            const data = {
+                name: customerNameInput.value.trim(),
+                phone: customerPhoneInput.value.trim(),
+                telegram: customerTelegramInput.value.trim(),
+                email: customerEmailInput.value.trim()
+            };
+            localStorage.setItem('userBookingInfo', JSON.stringify(data));
+        }
+        
+        // Отправка брони
         bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const date = bookingDateInput.value;
             const startHour = startHourSelect.value;
             const duration = durationSelect.value;
-            const endHour = parseInt(startHour) + parseInt(duration);
-            const startTime = `${startHour.padStart(2,'0')}:00`;
-            const endTime = `${endHour.toString().padStart(2,'0')}:00`;
-            const totalCost = parseInt(duration) * 290;
+            const customerName = customerNameInput.value.trim();
+            const customerPhone = customerPhoneInput.value.trim();
+            const customerTelegram = customerTelegramInput.value.trim();
+            const customerEmail = customerEmailInput.value.trim();
             
-            const customerName = document.getElementById('customerName').value.trim() || 'не указано';
-            const customerPhone = customerPhoneInput.value.trim() || 'не указано';
+            if (!date || !startHour || !duration || !customerName || !customerPhone) {
+                alert('Заполните обязательные поля: дата, время, имя, телефон');
+                return;
+            }
             
-            if (!date) { alert('Выберите дату'); return; }
+            // Сохраняем данные пользователя
+            saveUserData();
             
-            const messageText = `🕒 *Новая бронь часа*\n\n` +
-                `📅 Дата: ${date}\n` +
-                `⏰ Время: ${startTime} – ${endTime} (${duration} ч.)\n` +
-                `💰 Стоимость: ${totalCost} ₽\n` +
-                `👤 Имя: ${customerName}\n` +
-                `📞 Телефон: ${customerPhone}`;
+            // Показываем индикатор загрузки
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
             
-            const apiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            const payload = {
+                date: date,
+                startHour: parseInt(startHour),
+                duration: parseInt(duration),
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerTelegram: customerTelegram,
+                customerEmail: customerEmail
+            };
+            
             try {
-                const response = await fetch(PROXY_URL + apiUrl, {
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        chat_id: TELEGRAM_CHAT_ID, 
-                        text: messageText, 
-                        parse_mode: 'Markdown' 
-                    })
+                    body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-                if (result.ok) {
-                    alert('✅ Бронирование отправлено! Мы подтвердим в ближайшее время.');
+                if (result.success) {
+                    alert('✅ ' + (result.message || 'Бронирование успешно создано!'));
                     bookingForm.reset();
                     bookingDateInput.value = today;
+                    populateHours();
                     updateTotalPrice();
                     closeModal();
+                    // Обновим занятость после закрытия (не обязательно)
                 } else {
-                    alert('❌ Ошибка отправки. Попробуйте позже.');
+                    alert('❌ Ошибка: ' + (result.error || 'не удалось создать бронь'));
                 }
             } catch (error) {
                 console.error(error);
-                alert('❌ Ошибка соединения.');
+                alert('❌ Ошибка соединения с сервером.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Забронировать';
+                validateSelection();
             }
         });
         
@@ -1048,6 +1212,8 @@
             }
         });
         
+        // Инициализация при загрузке страницы
+        checkAvailabilityAndUpdate();
     })();
 </script>
 </body>
