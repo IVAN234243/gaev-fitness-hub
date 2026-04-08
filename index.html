@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>пример — студия</title>
-    <!-- Google Fonts: Montserrat (clean sans) -->
+    <!-- Google Fonts: Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,6 @@
             overflow-x: hidden;
         }
 
-        /* Color palette */
         :root {
             --primary: #c74778;
             --primary-dark: #b13c69;
@@ -41,7 +40,6 @@
             --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.01);
         }
 
-        /* navbar light */
         .navbar {
             position: fixed;
             top: 0;
@@ -108,7 +106,6 @@
             padding: 0 2rem;
         }
 
-        /* Hero section — light but with overlay for readability */
         .hero {
             height: 90vh;
             min-height: 600px;
@@ -167,6 +164,21 @@
             box-shadow: 0 6px 14px rgba(199, 71, 120, 0.25);
         }
 
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            box-shadow: none;
+            margin-left: 15px;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+            border-color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 22px rgba(0,0,0,0.15);
+        }
+
         .btn:hover {
             background: var(--secondary);
             transform: translateY(-3px);
@@ -197,7 +209,6 @@
             border-radius: 4px;
         }
 
-        /* benefits grid — cards light */
         .benefits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -242,7 +253,6 @@
             line-height: 1.5;
         }
 
-        /* slider gallery fresh */
         .slider-container {
             position: relative;
             width: 100%;
@@ -365,7 +375,6 @@
             width: 48px;
         }
 
-        /* contact section */
         .contact-section {
             background: #ffffff;
             border-bottom: none;
@@ -428,7 +437,6 @@
             color: var(--primary);
         }
 
-        /* form */
         .form-group {
             margin-bottom: 1.5rem;
             position: relative;
@@ -441,6 +449,7 @@
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 1rem;
+            z-index: 2;
         }
 
         .form-group.textarea-icon i {
@@ -448,7 +457,7 @@
             transform: none;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 14px 18px 14px 48px;
             background: #ffffff;
@@ -467,7 +476,15 @@
             min-height: 100px;
         }
 
-        input:focus, textarea:focus {
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23c74778" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 14px;
+        }
+
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(199, 71, 120, 0.1);
@@ -524,14 +541,100 @@
             font-size: 0.85rem;
         }
 
+        /* ----- MODAL STYLES ----- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.2s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: white;
+            max-width: 520px;
+            width: 90%;
+            border-radius: 36px;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.2);
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .active .modal {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 24px;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #aaa;
+            transition: 0.2s;
+        }
+        .modal-close:hover {
+            color: var(--primary);
+        }
+        .modal h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .price-info {
+            background: #f8f0fc;
+            padding: 14px 18px;
+            border-radius: 30px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .total-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .modal .form-group i {
+            left: 16px;
+        }
+        .modal input, .modal select {
+            padding-left: 48px;
+        }
+        .modal .btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .small-note {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 12px;
+            text-align: center;
+        }
+
         @media (max-width: 880px) {
-            .contact-wrapper {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
+            .contact-wrapper { grid-template-columns: 1fr; }
             .hero h1 { font-size: 2.4rem; }
             .slide img { height: 380px; }
-            .slide-content p { max-width: 90%; }
+            .btn-outline { margin-left: 0; margin-top: 15px; display: block; width: fit-content; margin-left: auto; margin-right: auto; }
         }
 
         @media (max-width: 680px) {
@@ -540,13 +643,11 @@
             .nav-links { gap: 1.2rem; }
             .hero h1 { font-size: 1.9rem; }
             .section-title { font-size: 1.8rem; }
-            .slider-btn { width: 38px; height: 38px; font-size: 1rem; }
+            .slider-btn { width: 38px; height: 38px; }
             .slide img { height: 300px; }
-            .slide-content { padding: 1.2rem; }
-            .slide-content h3 { font-size: 1.3rem; }
         }
         @media (max-width: 520px) {
-            .nav-links { display: none; } /* simple responsive: hide on tiny, but fine */
+            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -567,6 +668,7 @@
         <h1>пример</h1>
         <p>пример</p>
         <a href="#contact" class="btn">Записаться на тренировку</a>
+        <button class="btn btn-outline" id="buyHourBtn"><i class="fas fa-cart-shopping"></i> Купить час</button>
     </div>
 </section>
 
@@ -628,6 +730,49 @@
     <p>пример</p>
 </footer>
 
+<!-- МОДАЛЬНОЕ ОКНО БРОНИРОВАНИЯ ЧАСА -->
+<div class="modal-overlay" id="bookingModal">
+    <div class="modal">
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+        <h2>Бронирование часа</h2>
+        <form id="bookingForm">
+            <div class="form-group">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="date" id="bookingDate" name="date" required min="">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-clock"></i>
+                <select id="startHour" name="startHour" required>
+                    <!-- заполним JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-hourglass-half"></i>
+                <select id="duration" name="duration" required>
+                    <option value="1">1 час</option>
+                    <option value="2">2 часа</option>
+                    <option value="3">3 часа</option>
+                    <option value="4">4 часа</option>
+                </select>
+            </div>
+            <div class="price-info">
+                <span>Стоимость (290₽/час):</span>
+                <span class="total-price" id="totalPrice">290 ₽</span>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="customerName" name="customerName" placeholder="Ваше имя" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-phone-alt"></i>
+                <input type="tel" id="customerPhone" name="customerPhone" placeholder="+7 (___) ___-__-__" required>
+            </div>
+            <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Забронировать</button>
+            <p class="small-note">После отправки мы свяжемся для подтверждения</p>
+        </form>
+    </div>
+</div>
+
 <script>
     (function() {
         // fade-in animation
@@ -665,7 +810,6 @@
         const dotsContainer = document.getElementById('sliderDots');
         const slideCount = slides.length;
         
-        // clones for infinite
         const firstClone = slides[0].cloneNode(true);
         const lastClone = slides[slideCount-1].cloneNode(true);
         track.appendChild(firstClone);
@@ -678,7 +822,6 @@
         
         track.style.transform = `translateX(-${currentIndex * 100}%)`;
         
-        // create dots
         for (let i = 0; i < slideCount; i++) {
             const dot = document.createElement('div');
             dot.classList.add('dot');
@@ -734,24 +877,28 @@
         });
         updateDots();
         
-        // ========= PHONE MASK =========
-        const phoneInput = document.getElementById('phone');
-        function phoneMaskHandler(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (!value.startsWith('7')) value = '7' + value;
-            if (value.length > 11) value = value.slice(0,11);
-            let formatted = '+7';
-            if (value.length > 1) formatted += ' (' + value.slice(1,4);
-            if (value.length >= 5) formatted += ') ' + value.slice(4,7);
-            if (value.length >= 8) formatted += '-' + value.slice(7,9);
-            if (value.length >= 10) formatted += '-' + value.slice(9,11);
-            e.target.value = formatted;
+        // ========= PHONE MASK (общая функция) =========
+        function applyPhoneMask(inputElement) {
+            function phoneMaskHandler(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (!value.startsWith('7')) value = '7' + value;
+                if (value.length > 11) value = value.slice(0,11);
+                let formatted = '+7';
+                if (value.length > 1) formatted += ' (' + value.slice(1,4);
+                if (value.length >= 5) formatted += ') ' + value.slice(4,7);
+                if (value.length >= 8) formatted += '-' + value.slice(7,9);
+                if (value.length >= 10) formatted += '-' + value.slice(9,11);
+                e.target.value = formatted;
+            }
+            inputElement.addEventListener('input', phoneMaskHandler);
+            inputElement.addEventListener('focus', function() { if (!this.value) this.value = '+7 ('; });
+            inputElement.addEventListener('blur', function() { if (this.value === '+7 (' || this.value === '+7') this.value = ''; });
         }
-        phoneInput.addEventListener('input', phoneMaskHandler);
-        phoneInput.addEventListener('focus', function() { if (!this.value) this.value = '+7 ('; });
-        phoneInput.addEventListener('blur', function() { if (this.value === '+7 (' || this.value === '+7') this.value = ''; });
         
-        // ========= TELEGRAM FORM via CORS PROXY =========
+        const phoneInput = document.getElementById('phone');
+        applyPhoneMask(phoneInput);
+        
+        // ========= TELEGRAM (контактная форма) =========
         const contactForm = document.getElementById('contactForm');
         const TELEGRAM_TOKEN = '8150921908:AAE2y9IBWX2o1LmI4M0tvUv9PHKqfctOixY';
         const TELEGRAM_CHAT_ID = '1082877344';
@@ -786,6 +933,121 @@
                 alert('❌ Ошибка соединения. Проверьте интернет.');
             }
         });
+
+        // ---------- МОДАЛЬНОЕ ОКНО БРОНИРОВАНИЯ ----------
+        const modalOverlay = document.getElementById('bookingModal');
+        const buyBtn = document.getElementById('buyHourBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const bookingForm = document.getElementById('bookingForm');
+        const startHourSelect = document.getElementById('startHour');
+        const durationSelect = document.getElementById('duration');
+        const totalPriceSpan = document.getElementById('totalPrice');
+        const bookingDateInput = document.getElementById('bookingDate');
+        const customerPhoneInput = document.getElementById('customerPhone');
+        
+        // Установка минимальной даты (сегодня)
+        const today = new Date().toISOString().split('T')[0];
+        bookingDateInput.setAttribute('min', today);
+        bookingDateInput.value = today;
+        
+        // Заполняем часы (например с 9:00 до 22:00)
+        function populateHours() {
+            startHourSelect.innerHTML = '';
+            for (let h = 9; h <= 22; h++) {
+                const hourStr = h.toString().padStart(2, '0') + ':00';
+                const option = document.createElement('option');
+                option.value = h;
+                option.textContent = hourStr;
+                startHourSelect.appendChild(option);
+            }
+        }
+        populateHours();
+        
+        // Маска телефона для модалки
+        applyPhoneMask(customerPhoneInput);
+        
+        // Обновление цены
+        function updateTotalPrice() {
+            const hours = parseInt(durationSelect.value) || 1;
+            const total = hours * 290;
+            totalPriceSpan.textContent = total + ' ₽';
+        }
+        durationSelect.addEventListener('change', updateTotalPrice);
+        updateTotalPrice();
+        
+        // Открытие/закрытие модалки
+        buyBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        
+        // Отправка брони в Telegram
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = bookingDateInput.value;
+            const startHour = startHourSelect.value;
+            const duration = durationSelect.value;
+            const endHour = parseInt(startHour) + parseInt(duration);
+            const startTime = `${startHour.padStart(2,'0')}:00`;
+            const endTime = `${endHour.toString().padStart(2,'0')}:00`;
+            const totalCost = parseInt(duration) * 290;
+            
+            const customerName = document.getElementById('customerName').value.trim() || 'не указано';
+            const customerPhone = customerPhoneInput.value.trim() || 'не указано';
+            
+            if (!date) { alert('Выберите дату'); return; }
+            
+            const messageText = `🕒 *Новая бронь часа*\n\n` +
+                `📅 Дата: ${date}\n` +
+                `⏰ Время: ${startTime} – ${endTime} (${duration} ч.)\n` +
+                `💰 Стоимость: ${totalCost} ₽\n` +
+                `👤 Имя: ${customerName}\n` +
+                `📞 Телефон: ${customerPhone}`;
+            
+            const apiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            try {
+                const response = await fetch(PROXY_URL + apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        chat_id: TELEGRAM_CHAT_ID, 
+                        text: messageText, 
+                        parse_mode: 'Markdown' 
+                    })
+                });
+                const result = await response.json();
+                if (result.ok) {
+                    alert('✅ Бронирование отправлено! Мы подтвердим в ближайшее время.');
+                    bookingForm.reset();
+                    bookingDateInput.value = today;
+                    updateTotalPrice();
+                    closeModal();
+                } else {
+                    alert('❌ Ошибка отправки. Попробуйте позже.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('❌ Ошибка соединения.');
+            }
+        });
+        
+        // Закрытие по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModal();
+            }
+        });
+        
     })();
 </script>
 </body>
